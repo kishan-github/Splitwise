@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX 4
+#define MAX 10
+#define MAX_COL 2
 
-int arr[MAX][MAX];
+int arr[MAX][MAX_COL];
+int noOfUsers;
 
 void updateBalance();
 int calculateTotalAmount();
@@ -18,14 +20,16 @@ int main()
         {
                 scanf("%d%d", &idx, &amt);
                 arr[idx][0] = arr[idx][0] + amt;
+		noOfUsers++;
         }
+	noOfUsers--;
 
         updateBalance();
 
         printAmountToGive();
 
         idx = 0;
-        while(idx < MAX)
+        while(idx < noOfUsers)
         {
                 printf("\n%d  %d   %d", idx, arr[idx][0], arr[idx][1]);
                 idx++;
@@ -40,11 +44,11 @@ void updateBalance()
         int user_amt = 0;
         int user_rem = 1;
         int total_Amount = calculateTotalAmount();
-        int amount = total_Amount / MAX;
+        int amount = total_Amount / noOfUsers;
 
         printf("----------------- %d         %d", total_Amount, amount);
 
-        while(user_idx < MAX)
+        while(user_idx < noOfUsers)
         {
                 arr[user_idx][user_rem] = arr[user_idx][user_amt] - amount;
                 user_idx++;
@@ -57,7 +61,7 @@ int calculateTotalAmount()
         int total = 0;
         int idx = 0;
 
-        while(idx < MAX)
+        while(idx < noOfUsers)
         {
                 total = total + arr[idx][0];
                 idx++;
@@ -78,12 +82,12 @@ void printAmountToGive()
         int i = 0;
 
 
-        for(; i < MAX; i++)
+        for(; i < noOfUsers; i++)
         {
                 maxToGive = 0;
                 maxToTake = 0;
 
-                for(idx = 0; idx < MAX; idx++)
+                for(idx = 0; idx < noOfUsers; idx++)
                 {
                         if((maxToGive >= arr[idx][idxAmt]) &&
                            (arr[idx][idxAmt] < 0))
