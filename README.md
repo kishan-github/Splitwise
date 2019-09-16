@@ -13,7 +13,7 @@ To run the application, first you need to compile the code. To compile the code,
 
 Now you can run the executable file available in the bin folder.
 
-Note :- Working on to use linked list instead of arrays and change the logic to divide amount unequally based on user requirement.
+Note :- Need to start working on changing the logic to divide amount unequally based on user requirement.
 
 Language used - C
 Operating system - Linux
