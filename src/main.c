@@ -1,18 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <main.h>
+#include <stdbool.h>
 
-#define MAX 10
-#define MAX_COL 2
-#define MAX_NAME_LENGTH 100
 
-int arr[MAX][MAX_COL];
-char userName[MAX][MAX_NAME_LENGTH];
-int noOfUsers;
-
-void insertUser();
-void updateBalance();
-int calculateTotalAmount();
-void printAmountToGive();
+int noOfUsers;		// Total no of user in the list
+user_details_t *head;	// Head node of the list containing details of users.
 
 int main()
 {
@@ -32,9 +26,8 @@ int main()
 void insertUser()
 {
 	char name[MAX_NAME_LENGTH];
-	int idx = 0;
-	int amt = 0;
-	int idxAmt = 0;
+	int amount = 0;
+	user_details_t *user = NULL;
 
 	printf("\nStart entering name and amount of each user.\n");
 	printf("\nEnter exit to stop entering data\n");
@@ -43,29 +36,27 @@ void insertUser()
 	{
 		printf("\nEnter name and amount\n");
 		scanf("%s", name);
-		if(!strcmp(name,"exit"))
+		if(!strcmp(name,"exit"))	// Exit the loop when user finished entering user.
 			break;
 	
-		while(scanf("%d", &amt) != 1)
+		while(scanf("%d", &amount) != 1)	// Check if non numeric value is entered.
 		{
 			printf("\nERROR : Only numeric value allowed.\n");
 			printf("\nEnter the amount again : ");
 			while(getchar() != '\n');
 		}
-		for(idx = 0; idx < noOfUsers; idx++)
+
+		user = get_user_handle_in_list(name);	// Get node address of the user.
+		if(user)				// If user already in the list then just update the amount paid.
 		{
-			if(!strcmp(name,userName[idx]))
-			{
-				arr[idx][idxAmt] += amt;
-				break;
-			}
+			user->amount_paid = user->amount_paid + amount;
 		}
-	
-		if(idx == noOfUsers)
+		else					// If user not available in the list the create a entry in the list.
 		{
-			strcpy(userName[idx], name);
-			arr[idx][idxAmt] = amt;
-			noOfUsers++;
+			user = create_node(name, amount);
+			user->next = head;
+			head = user;			// Update the head node.
+			noOfUsers++;			// Update number of users.
 		}
 	}
 }
@@ -73,29 +64,31 @@ void insertUser()
 // Update the balance each user have to pay of take.
 void updateBalance()
 {
-        int user_idx = 0;
-        int user_amt = 0;
-        int user_rem = 1;
-        int total_Amount = calculateTotalAmount();
-        int amount = total_Amount / noOfUsers;
+        int total_amount = 0;
+        int amount = 0;
+	user_details_t *user = head;
 
-        while(user_idx < noOfUsers)
+	total_amount = calculateTotalAmount();
+	amount = total_amount / noOfUsers;
+
+        while(user)
         {
-                arr[user_idx][user_rem] = arr[user_idx][user_amt] - amount;
-                user_idx++;
+                user->remaining_balance = user->amount_paid - amount;	// Update remaining balance for each user that he have to take or give.
+                user = user->next;
         }
 }
 
 // Calculate the total amount paid by users.
 int calculateTotalAmount()
 {
-        int total = 0;
-        int idx = 0;
+	int total = 0;
+        user_details_t *user = head;
 
-        while(idx < noOfUsers)
+        while(user)
+
         {
-                total = total + arr[idx][0];
-                idx++;
+                total = total + user->amount_paid;
+                user = user->next;
         }
 
         return total;
@@ -104,45 +97,92 @@ int calculateTotalAmount()
 // Print which user have to pay money to which user.
 void printAmountToGive()
 {
-        int idx = 0;
         int maxToGive = 0;
         int maxToTake = 0;
-        int idxOfGive = 0;
-        int idxOfTake = 0;
-        int idxAmt = 1;
-        int i = 0;
+	user_details_t *user = NULL;		// Used for iterating over the list.
+	user_details_t *user_of_give = NULL;	// Used to store the address of the node that have to give money.
+	user_details_t *user_of_take = NULL;	// Used to store the address of the node that have to take money.
 
-
-        for(; i < noOfUsers; i++)
+        while(true)
         {
                 maxToGive = 0;
                 maxToTake = 0;
 
-                for(idx = 0; idx < noOfUsers; idx++)
+                for(user = head; user; user = user->next)
                 {
-                        if((maxToGive >= arr[idx][idxAmt]) &&
-                           (arr[idx][idxAmt] < 0))
+                        if((maxToGive >= user->remaining_balance) &&
+                           (user->remaining_balance < 0))
                         {
-                                maxToGive = arr[idx][idxAmt];
-                                idxOfGive = idx;
+                                maxToGive = user->remaining_balance;	// Get the user who have to pay max amount.
+                                user_of_give = user;
                         }
 
-                        if((maxToTake <= arr[idx][idxAmt]) &&
-                           (arr[idx][idxAmt] > 0))
+                        if((maxToTake <= user->remaining_balance) &&
+                           (user->remaining_balance > 0))
                         {
-                                maxToTake = arr[idx][idxAmt];
-                                idxOfTake = idx;
+                                maxToTake = user->remaining_balance;	// Get user who have to take max amount.
+                                user_of_take = user;
                         }
                 }
 
                 if(maxToGive && maxToTake)
                 {
-                        arr[idxOfTake][idxAmt] += maxToGive;
-                        arr[idxOfGive][idxAmt] -= maxToGive;
+			if( -maxToGive >= maxToTake )
+			{
+				user_of_give->remaining_balance += maxToTake;	// Update the reamining balance after taking money from payer.
+				maxToGive = -maxToTake;
+				user_of_take->remaining_balance = 0;
+			}
+			else
+			{
+				user_of_take->remaining_balance += maxToGive;	// Update the remaining balance after giving money.
+				user_of_give->remaining_balance = 0;
+			}
 
-                        printf("\n%s -> %s  , Amount = %d\n", userName[idxOfGive], userName[idxOfTake], -maxToGive);
+                        printf("\n%s -> %s  , Amount = %d\n", user_of_give->name, user_of_take->name, -maxToGive);
                 }
 		else
 			break;
         }
+}
+
+// Create a node to add new entry in the list.
+user_details_t* create_node(char *name, int amount)
+{
+	user_details_t *user = NULL;
+
+	user = malloc(sizeof(user_details_t));
+	if(!user)
+	{
+		printf("\n%s : %d : Memory allocation failed.", __func__, __LINE__);
+		return NULL;
+	}
+
+	user->name = malloc(sizeof(char) * (strlen(name) + 1));
+	if(!(user->name))
+	{
+		printf("\n%s : %d : Memory allocation failed.", __func__, __LINE__);
+		return NULL;
+	}
+
+	strcpy(user->name, name);
+	user->amount_paid = amount;
+	user->next = NULL;
+
+	return user;
+}
+
+// Get the address of the node having name same as argument name.
+user_details_t* get_user_handle_in_list(char *name)
+{
+	user_details_t *user = head;
+
+	while(user)
+	{
+		if(!strcmp(user->name, name))
+			return user;
+		user = user->next;
+	}
+
+	return NULL;
 }
