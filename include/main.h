@@ -3,6 +3,14 @@
 
 #define MAX_NAME_LENGTH 100
 
+#define MEM_ALLOC(ptr, size)	\
+		ptr = malloc(size);	\
+		if(!ptr)		\
+		{			\
+			printf("\n%s : %d : Memory allocation failed.", __func__, __LINE__);	\
+			return NULL;	\
+		}	\
+
 typedef struct user_details
 {
 	char *name;			// Name of the user

@@ -151,19 +151,9 @@ user_details_t* create_node(char *name, int amount)
 {
 	user_details_t *user = NULL;
 
-	user = malloc(sizeof(user_details_t));
-	if(!user)
-	{
-		printf("\n%s : %d : Memory allocation failed.", __func__, __LINE__);
-		return NULL;
-	}
+	MEM_ALLOC(user, sizeof(user_details_t));
 
-	user->name = malloc(sizeof(char) * (strlen(name) + 1));
-	if(!(user->name))
-	{
-		printf("\n%s : %d : Memory allocation failed.", __func__, __LINE__);
-		return NULL;
-	}
+	MEM_ALLOC(user->name, sizeof(char) * (strlen(name) + 1));
 
 	strcpy(user->name, name);
 	user->amount_paid = amount;
