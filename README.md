@@ -17,4 +17,4 @@ Note :- Need to start working on changing the logic to divide amount unequally b
 
 Language used - C
 Operating system - Linux
-Data Structures - Array
+Data Structures - Array / Linked List
