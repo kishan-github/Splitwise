@@ -13,6 +13,10 @@ int main()
 	// Get user name and amount paid by them.
 	insertUser();
 
+	// Return if no user is available.
+	if(!noOfUsers)
+		return 0;
+
 	// Update each users give or take amount.
         updateBalance();
 
